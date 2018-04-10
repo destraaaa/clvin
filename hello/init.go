@@ -39,7 +39,7 @@ func NewHelloWorldModule() *HelloWorldModule {
 
 	return &HelloWorldModule{
 		cfg:       &cfg,
-		something: "John Doe",
+		something: "Aryl Doe",
 		stats:     expvar.NewInt("rpsStats"),
 	}
 
@@ -57,5 +57,5 @@ func (hlm *HelloWorldModule) someSlowFuncWeWantToTrace(ctx context.Context, w ht
 	span, ctx := opentracing.StartSpanFromContext(ctx, "someSlowFuncWeWantToTrace")
 	defer span.Finish()
 
-	w.Write([]byte("Hello " + hlm.something))
+	w.Write([]byte("Hello there" + hlm.something))
 }
