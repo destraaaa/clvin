@@ -29,14 +29,14 @@ func main() {
 	}
 
 	hwm := hello.NewHelloWorldModule()
-	// interview := interviewee.RetrieveData()
+	// interview := interviewee.WriteData()
 
 	http.Handle("/metrics", promhttp.Handler())
 
 	http.HandleFunc("/hello", hwm.SayHelloWorld)
 	go logging.StatsLog()
 
-	// http.HandleFunc("/interviewee/save", interview.SayHelloWorld)
+	// http.HandleFunc("/interviewee/save", interview.WriteJson)
 	// go logging.StatsLog()
 
 	tracer.Init(&tracer.Config{Port: 8700, Enabled: true})
