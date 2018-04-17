@@ -13,8 +13,9 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/interviewee/save", interviewee.WriteData)
-	r.Run()
+	r.GET("/nonopsform/view", interviewee.ReadData)
 
+	r.Run()
 	// flag.Parse()
 	// logging.LogInit()
 
