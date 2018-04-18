@@ -7,8 +7,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
-	// _ "github.com/lib/pq"
+	_ "github.com/lib/pq" // _ "github.com/lib/pq"
 )
 
 type NonOps struct {
@@ -33,27 +32,27 @@ type NonOps struct {
 	Ftimestamp        string `json:"timestamp"`
 }
 
-type NonOpsG struct {
-	id               int
-	FullName         string
-	NickName         string
-	PhoneNumber      string
-	Email            string
-	School           string
-	Major            string
-	GPA              string
-	Purpose          string
-	Contactpersonid  string
-	Positionapply    string
-	Scheduletime     string
-	Jobinfo          string
-	Acquintances     string
-	Acquintancesname string
-	Relationship     string
-	ReferralName     string
-	Status           bool
-	Timestamp        string
-}
+// type NonOpsG struct {
+// 	id               int
+// 	FullName         string
+// 	NickName         string
+// 	PhoneNumber      string
+// 	Email            string
+// 	School           string
+// 	Major            string
+// 	GPA              string
+// 	Purpose          string
+// 	Contactpersonid  string
+// 	Positionapply    string
+// 	Scheduletime     string
+// 	Jobinfo          string
+// 	Acquintances     string
+// 	Acquintancesname string
+// 	Relationship     string
+// 	ReferralName     string
+// 	Status           bool
+// 	Timestamp        string
+// }
 
 const (
 	host     = "localhost"
