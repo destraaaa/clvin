@@ -6,8 +6,8 @@ import (
 
 	// "github.com/tokopedia/gosample/hello"
 	"github.com/gin-gonic/gin"
+	"github.com/gosample/datapie"
 	"github.com/gosample/interviewee"
-	// "github.com/gosample/datapie"
 )
 
 func main() {
@@ -15,6 +15,7 @@ func main() {
 
 	r.POST("/interviewee/save", interviewee.WriteData)
 	r.GET("/nonopsform/view", interviewee.ReadData)
+	r.GET("/nonopsform/view/chartpie", datapie.ShowPie)
 
 	r.Run()
 	// flag.Parse()

@@ -104,8 +104,8 @@ func WriteData(c *gin.Context) {
 	sqlStatement := `
 				INSERT INTO NonOps (fullname, nickname,
 					email, phone, school, major, gpa, purpose, contactPersonId,
-					positionApply, jobInfo, acquintances, scheduleTime,
-					acquintancesName, relationship, referralName, status)
+					positionApply, jobInfo, acquaintance, scheduleTime,
+					acquaintanceName, relationship, referralName, status)
 				VALUES ($1,$2, $3,$4,
 					$5, $6, $7, $8,
 					$9, $10, $11,$12,
