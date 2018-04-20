@@ -6,6 +6,7 @@ import (
 
 	// "github.com/tokopedia/gosample/hello"
 	"github.com/gin-gonic/gin"
+	"github.com/gosample/auth"
 	"github.com/gosample/datapie"
 	"github.com/gosample/interviewee"
 )
@@ -16,7 +17,7 @@ func main() {
 	r.POST("/interviewee/save", interviewee.WriteData)
 	r.GET("/nonopsform/view", interviewee.ReadData)
 	r.GET("/nonopsform/view/chartpie", datapie.ShowPie)
-
+	r.GET("/authLogin", auth.Authentication)
 	r.Run()
 	// flag.Parse()
 	// logging.LogInit()
