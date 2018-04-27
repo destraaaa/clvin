@@ -15,9 +15,16 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/interviewee/save", interviewee.WriteData)
-	r.GET("/nonopsform/view", interviewee.ReadData)
+	r.GET("/nonopsform/view", interviewee.ReadDataNon)
+	r.GET("/opsform/view", interviewee.ReadDataOps)
 	r.GET("/nonopsform/view/chartpie", datapie.ShowPie)
-	r.GET("/authLogin", auth.Authentication)
+	r.GET("/authLogin/validate", auth.ShowValidate)
+	r.GET("/authLogin/user", auth.ShowUser)
+	r.POST("/authLogin/user", auth.WriteUser)
+	// r.GET("/", auth.indexHandler)
+	// r.GET("/login", auth.loginHandler)
+	// r.GET("/auth", auth.authHandler)
+
 	r.Run()
 	// flag.Parse()
 	// logging.LogInit()

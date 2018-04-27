@@ -29,6 +29,8 @@ type NonOps struct {
 	Frelationship     string `json:"relationship"`
 	FreferralName     string `json:"referralName"`
 	Fstatus           bool   `json:"status"`
+	FformType         string `json:"formType"`
+	Fprogress         int    `json:"progress"`
 	Ftimestamp        string `json:"timestamp"`
 }
 
@@ -105,26 +107,26 @@ func WriteData(c *gin.Context) {
 				INSERT INTO NonOps (fullname, nickname,
 					email, phone, school, major, gpa, purpose, contactPersonId,
 					positionApply, jobInfo, acquaintance, scheduleTime,
-					acquaintanceName, relationship, referralName, status)
+					acquaintanceName, relationship, referralName,formType, progress,status)
 				VALUES ($1,$2, $3,$4,
 					$5, $6, $7, $8,
 					$9, $10, $11,$12,
-					$13, $14, $15, $16, true
+					$13, $14, $15, $16, $17,$18,true
 					)`
 	_, err = db.Exec(sqlStatement, nonops.FfullName, nonops.FnickName, nonops.Femail,
 		nonops.FphoneNumber, nonops.Fschool, nonops.Fmajor, nonops.FGPA, nonops.Fpurpose,
 		nonops.Fcontactpersonid, nonops.Fposition, nonops.Fjobinfo,
 		nonops.Facquaintance, nonops.FscheduleTime, nonops.FacquaintanceName,
-		nonops.Frelationship, nonops.FreferralName)
+		nonops.Frelationship, nonops.FreferralName, nonops.FformType, nonops.Fprogress)
 	if err != nil {
 		panic(err)
 	}
 	//fmt.Printf("hello %s, you is %s, your email is %s \n", nonops.FfullName, nonops.FnickName, nonops.Femail)
 
-	c.Writer.Write([]byte(nonops.FacquaintanceName))
+	// c.Writer.Write([]byte(nonops.FacquaintanceName))
 
 }
-func ReadData(c *gin.Context) {
+func ReadDataNon(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -145,7 +147,12 @@ func ReadData(c *gin.Context) {
 
 	fmt.Println("Successfully connected!")
 
-	rows, err := db.Query(`SELECT * FROM nonops`)
+	rows, err := db.Query(`SELECT id, fullname, nickname,
+		email, phone, school, major, gpa,
+		purpose, contactpersonid, positionapply,
+		jobinfo, acquaintance, scheduletime,
+		acquaintancename, relationship, referralName, status,
+		logtimetamps FROM nonops WHERE formtype = 'Non Operational Form'`)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -160,6 +167,57 @@ func ReadData(c *gin.Context) {
 			&nonops.Fpurpose, &nonops.Fcontactpersonid, &nonops.Fposition,
 			&nonops.Fjobinfo, &nonops.Facquaintance, &nonops.FscheduleTime,
 			&nonops.FacquaintanceName, &nonops.Frelationship, &nonops.FreferralName, &nonops.Fstatus,
+			&nonops.Ftimestamp); err != nil {
+			log.Fatal(err)
+		}
+		response = append(response, nonops)
+	}
+
+	b, _ := json.MarshalIndent(response, "", "  ")
+	println(string(b))
+	c.Writer.Write(b)
+}
+
+func ReadDataOps(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected!")
+
+	rows, err := db.Query(`SELECT id, fullname, nickname,
+		email, phone, school, purpose, contactpersonid,
+		positionapply, jobinfo, acquaintance, scheduletime,
+		acquaintancename, relationship, referralName, status,
+		logtimetamps FROM nonops WHERE formtype = 'Operational Form'`)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer rows.Close()
+	// println(rows)
+
+	var response []NonOps
+	for rows.Next() {
+		var nonops NonOps
+		if err := rows.Scan(&nonops.Fid, &nonops.FfullName, &nonops.FnickName,
+			&nonops.Femail, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fpurpose,
+			&nonops.Fcontactpersonid, &nonops.Fposition, &nonops.Fjobinfo,
+			&nonops.Facquaintance, &nonops.FscheduleTime, &nonops.FacquaintanceName,
+			&nonops.Frelationship, &nonops.FreferralName, &nonops.Fstatus,
 			&nonops.Ftimestamp); err != nil {
 			log.Fatal(err)
 		}
