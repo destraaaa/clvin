@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq" // _ "github.com/lib/pq"
 )
 
-type NonOps struct {
+type Candidate struct {
 	Fid               int    `json:"id"`
 	FfullName         string `json:"fullName"`
 	FnickName         string `json:"nickName"`
@@ -30,31 +30,9 @@ type NonOps struct {
 	FreferralName     string `json:"referralName"`
 	Fstatus           bool   `json:"status"`
 	FformType         string `json:"formType"`
-	Fprogress         int    `json:"progress"`
+	Fprogress         string `json:"progress"`
 	Ftimestamp        string `json:"timestamp"`
 }
-
-// type NonOpsG struct {
-// 	id               int
-// 	FullName         string
-// 	NickName         string
-// 	PhoneNumber      string
-// 	Email            string
-// 	School           string
-// 	Major            string
-// 	GPA              string
-// 	Purpose          string
-// 	Contactpersonid  string
-// 	Positionapply    string
-// 	Scheduletime     string
-// 	Jobinfo          string
-// 	Acquintances     string
-// 	Acquintancesname string
-// 	Relationship     string
-// 	ReferralName     string
-// 	Status           bool
-// 	Timestamp        string
-// }
 
 const (
 	host     = "localhost"
@@ -80,7 +58,7 @@ func WriteData(c *gin.Context) {
 
 	// fmt.Printf("%s", bodyBuffer)
 	//json.NewEncoder(w).Encode(bodyBuffer)
-	var nonops NonOps
+	var nonops Candidate
 	err := c.BindJSON(&nonops)
 	if err != nil {
 		fmt.Println("Error Binding JSON")
@@ -104,7 +82,7 @@ func WriteData(c *gin.Context) {
 	fmt.Println("Successfully connected!")
 
 	sqlStatement := `
-				INSERT INTO NonOps (fullname, nickname,
+				INSERT INTO Candidate (fullname, nickname,
 					email, phone, school, major, gpa, purpose, contactPersonId,
 					positionApply, jobInfo, acquaintance, scheduleTime,
 					acquaintanceName, relationship, referralName,formType, progress,status)
@@ -148,28 +126,32 @@ func ReadDataNon(c *gin.Context) {
 	fmt.Println("Successfully connected!")
 
 	rows, err := db.Query(`SELECT id, fullname, nickname,
-		email, phone, school, major, gpa,
+		email, (CASE WHEN progress=1 THEN 'no status'
+					WHEN progress=2 THEN 'reject'
+					WHEN progress=3 THEN 'approved'
+					ELSE 'on progress' END)as progress, phone, school, major, gpa,
 		purpose, contactpersonid, positionapply,
 		jobinfo, acquaintance, scheduletime,
 		acquaintancename, relationship, referralName, status,
-		logtimetamps FROM nonops WHERE formtype = 'Non Operational Form'`)
+		logtimetamps FROM candidate WHERE formtype = 'Non Operational Form'`)
 	if err != nil {
 		log.Panic(err)
 	}
 	defer rows.Close()
 	// println(rows)
 
-	var response []NonOps
+	var response []Candidate
 	for rows.Next() {
-		var nonops NonOps
+		var nonops Candidate
 		if err := rows.Scan(&nonops.Fid, &nonops.FfullName, &nonops.FnickName,
-			&nonops.Femail, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fmajor, &nonops.FGPA,
+			&nonops.Femail, &nonops.Fprogress, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fmajor, &nonops.FGPA,
 			&nonops.Fpurpose, &nonops.Fcontactpersonid, &nonops.Fposition,
 			&nonops.Fjobinfo, &nonops.Facquaintance, &nonops.FscheduleTime,
 			&nonops.FacquaintanceName, &nonops.Frelationship, &nonops.FreferralName, &nonops.Fstatus,
 			&nonops.Ftimestamp); err != nil {
 			log.Fatal(err)
 		}
+
 		response = append(response, nonops)
 	}
 
@@ -200,28 +182,31 @@ func ReadDataOps(c *gin.Context) {
 	fmt.Println("Successfully connected!")
 
 	rows, err := db.Query(`SELECT id, fullname, nickname,
-		email, phone, school, purpose, contactpersonid,
+		email, (CASE WHEN progress=1 THEN 'no status'
+			WHEN progress=2 THEN 'reject'
+			WHEN progress=3 THEN 'approved'
+			ELSE 'on progress' END)as progress, phone, school, purpose, contactpersonid,
 		positionapply, jobinfo, acquaintance, scheduletime,
 		acquaintancename, relationship, referralName, status,
-		logtimetamps FROM nonops WHERE formtype = 'Operational Form'`)
+		logtimetamps FROM candidate WHERE formtype = 'Operational Form'`)
 	if err != nil {
 		log.Panic(err)
 	}
 	defer rows.Close()
 	// println(rows)
 
-	var response []NonOps
+	var response []Candidate
 	for rows.Next() {
-		var nonops NonOps
-		if err := rows.Scan(&nonops.Fid, &nonops.FfullName, &nonops.FnickName,
-			&nonops.Femail, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fpurpose,
-			&nonops.Fcontactpersonid, &nonops.Fposition, &nonops.Fjobinfo,
-			&nonops.Facquaintance, &nonops.FscheduleTime, &nonops.FacquaintanceName,
-			&nonops.Frelationship, &nonops.FreferralName, &nonops.Fstatus,
-			&nonops.Ftimestamp); err != nil {
+		var ops Candidate
+		if err := rows.Scan(&ops.Fid, &ops.FfullName, &ops.FnickName,
+			&ops.Femail, &ops.Fprogress, &ops.FphoneNumber, &ops.Fschool, &ops.Fpurpose,
+			&ops.Fcontactpersonid, &ops.Fposition, &ops.Fjobinfo,
+			&ops.Facquaintance, &ops.FscheduleTime, &ops.FacquaintanceName,
+			&ops.Frelationship, &ops.FreferralName, &ops.Fstatus,
+			&ops.Ftimestamp); err != nil {
 			log.Fatal(err)
 		}
-		response = append(response, nonops)
+		response = append(response, ops)
 	}
 
 	b, _ := json.MarshalIndent(response, "", "  ")

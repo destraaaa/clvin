@@ -7,7 +7,7 @@ import (
 	// "github.com/tokopedia/gosample/hello"
 	"github.com/gin-gonic/gin"
 	"github.com/gosample/auth"
-	"github.com/gosample/datapie"
+	"github.com/gosample/chart"
 	"github.com/gosample/interviewee"
 )
 
@@ -17,7 +17,12 @@ func main() {
 	r.POST("/interviewee/save", interviewee.WriteData)
 	r.GET("/nonopsform/view", interviewee.ReadDataNon)
 	r.GET("/opsform/view", interviewee.ReadDataOps)
-	r.GET("/nonopsform/view/chartpie", datapie.ShowPie)
+	r.GET("/nonopsform/view/total", chart.Candidate)
+	r.GET("/nonopsform/view/schoolpie", chart.SchoolPie)
+	r.GET("/nonopsform/view/jobpie", chart.JobPie)
+	r.GET("/nonopsform/view/statbar", chart.StatBar)
+	r.GET("/nonopsform/view/cpbar", chart.CPBar)
+	r.GET("/nonopsform/view/posbar", chart.PositionBar)
 	r.GET("/authLogin/validate", auth.ShowValidate)
 	r.GET("/authLogin/user", auth.ShowUser)
 	r.POST("/authLogin/user", auth.WriteUser)
