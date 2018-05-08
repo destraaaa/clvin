@@ -5,33 +5,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gosample/chart"
 	_ "github.com/lib/pq" // _ "github.com/lib/pq"
 )
 
 type Candidate struct {
-	Fid               int    `json:"id"`
-	FfullName         string `json:"fullName"`
-	FnickName         string `json:"nickName"`
-	FphoneNumber      string `json:"phoneNumber"`
-	Femail            string `json:"email"`
-	Fschool           string `json:"school"`
-	Fmajor            string `json:"major"`
-	FGPA              string `json:"GPA"`
-	Fpurpose          string `json:"purpose"`
-	Fcontactpersonid  string `json:"meet"`
-	Fposition         string `json:"position"`
-	FscheduleTime     string `json:"time"`
-	Fjobinfo          string `json:"infoJob"`
-	Facquaintance     string `json:"acquaintance"`
-	FacquaintanceName string `json:"acquaintanceName"`
-	Frelationship     string `json:"relationship"`
-	FreferralName     string `json:"referralName"`
-	Fstatus           bool   `json:"status"`
-	FformType         string `json:"formType"`
-	Fprogress         string `json:"progress"`
-	Ftimestamp        string `json:"timestamp"`
+	Fid               int       `json:"id"`
+	FfullName         string    `json:"fullName"`
+	FnickName         string    `json:"nickName"`
+	FphoneNumber      string    `json:"phoneNumber"`
+	Femail            string    `json:"email"`
+	Fschool           string    `json:"school"`
+	Fmajor            string    `json:"major"`
+	FGPA              string    `json:"GPA"`
+	Fpurpose          string    `json:"purpose"`
+	Fcontactpersonid  string    `json:"meet"`
+	Fposition         string    `json:"position"`
+	FscheduleTime     string    `json:"time"`
+	Fjobinfo          string    `json:"infoJob"`
+	Facquaintance     string    `json:"acquaintance"`
+	FacquaintanceName string    `json:"acquaintanceName"`
+	Frelationship     string    `json:"relationship"`
+	FreferralName     string    `json:"referralName"`
+	Fstatus           bool      `json:"status"`
+	FformType         string    `json:"formType"`
+	Fprogress         int       `json:"progress,omitempty"`
+	Fprog             string    `json:"statProgress,omitempty"`
+	Ftimestamp        time.Time `json:"timestamp"`
 }
 
 const (
@@ -125,15 +128,19 @@ func ReadDataNon(c *gin.Context) {
 
 	fmt.Println("Successfully connected!")
 
-	rows, err := db.Query(`SELECT id, fullname, nickname,
-		email, (CASE WHEN progress=1 THEN 'no status'
-					WHEN progress=2 THEN 'reject'
-					WHEN progress=3 THEN 'approved'
-					ELSE 'on progress' END)as progress, phone, school, major, gpa,
-		purpose, contactpersonid, positionapply,
-		jobinfo, acquaintance, scheduletime,
-		acquaintancename, relationship, referralName, status,
-		logtimetamps FROM candidate WHERE formtype = 'Non Operational Form'`)
+	result := chart.Filtering()
+
+	sqlStatement := `SELECT id, fullname, nickname,
+	email, (CASE WHEN progress=1 THEN 'no status'
+				WHEN progress=2 THEN 'reject'
+				WHEN progress=3 THEN 'approved'
+				ELSE 'on progress' END)as progress, phone, school, major, gpa,
+	purpose, contactpersonid, positionapply,
+	jobinfo, acquaintance, scheduletime,
+	acquaintancename, relationship, referralName, status,
+	logtimestamps FROM candidate WHERE formtype = 'Non Operational Form' ` + result
+
+	rows, err := db.Query(sqlStatement)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -144,7 +151,64 @@ func ReadDataNon(c *gin.Context) {
 	for rows.Next() {
 		var nonops Candidate
 		if err := rows.Scan(&nonops.Fid, &nonops.FfullName, &nonops.FnickName,
-			&nonops.Femail, &nonops.Fprogress, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fmajor, &nonops.FGPA,
+			&nonops.Femail, &nonops.Fprog, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fmajor, &nonops.FGPA,
+			&nonops.Fpurpose, &nonops.Fcontactpersonid, &nonops.Fposition,
+			&nonops.Fjobinfo, &nonops.Facquaintance, &nonops.FscheduleTime,
+			&nonops.FacquaintanceName, &nonops.Frelationship, &nonops.FreferralName, &nonops.Fstatus,
+			&nonops.Ftimestamp); err != nil {
+			log.Fatal(err)
+		}
+
+		response = append(response, nonops)
+	}
+
+	b, _ := json.MarshalIndent(response, "", "  ")
+	println(string(b))
+	c.Writer.Write(b)
+}
+
+func ReadRejected(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected!")
+
+	// result := chart.Filtering()
+
+	sqlStatement := `SELECT id, fullname, nickname,
+	email, phone, school, major, gpa,
+	purpose, contactpersonid, positionapply,
+	jobinfo, acquaintance, scheduletime,
+	acquaintancename, relationship, referralName, status,
+	logtimestamps FROM candidate WHERE progress = 2`
+
+	rows, err := db.Query(sqlStatement)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer rows.Close()
+	// println(rows)
+
+	var response []Candidate
+	for rows.Next() {
+		var nonops Candidate
+		if err := rows.Scan(&nonops.Fid, &nonops.FfullName, &nonops.FnickName,
+			&nonops.Femail, &nonops.FphoneNumber, &nonops.Fschool, &nonops.Fmajor, &nonops.FGPA,
 			&nonops.Fpurpose, &nonops.Fcontactpersonid, &nonops.Fposition,
 			&nonops.Fjobinfo, &nonops.Facquaintance, &nonops.FscheduleTime,
 			&nonops.FacquaintanceName, &nonops.Frelationship, &nonops.FreferralName, &nonops.Fstatus,
@@ -181,14 +245,17 @@ func ReadDataOps(c *gin.Context) {
 
 	fmt.Println("Successfully connected!")
 
-	rows, err := db.Query(`SELECT id, fullname, nickname,
-		email, (CASE WHEN progress=1 THEN 'no status'
-			WHEN progress=2 THEN 'reject'
-			WHEN progress=3 THEN 'approved'
-			ELSE 'on progress' END)as progress, phone, school, purpose, contactpersonid,
-		positionapply, jobinfo, acquaintance, scheduletime,
-		acquaintancename, relationship, referralName, status,
-		logtimetamps FROM candidate WHERE formtype = 'Operational Form'`)
+	result := chart.Filtering()
+	sqlStatement := `SELECT id, fullname, nickname,
+	email, (CASE WHEN progress=1 THEN 'no status'
+		WHEN progress=2 THEN 'reject'
+		WHEN progress=3 THEN 'approved'
+		ELSE 'on progress' END)as progress, phone, school, purpose, contactpersonid,
+	positionapply, jobinfo, acquaintance, scheduletime,
+	acquaintancename, relationship, referralName, status,
+	logtimestamps FROM candidate WHERE formtype = 'Operational Form' ` + result
+
+	rows, err := db.Query(sqlStatement)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -199,7 +266,7 @@ func ReadDataOps(c *gin.Context) {
 	for rows.Next() {
 		var ops Candidate
 		if err := rows.Scan(&ops.Fid, &ops.FfullName, &ops.FnickName,
-			&ops.Femail, &ops.Fprogress, &ops.FphoneNumber, &ops.Fschool, &ops.Fpurpose,
+			&ops.Femail, &ops.Fprog, &ops.FphoneNumber, &ops.Fschool, &ops.Fpurpose,
 			&ops.Fcontactpersonid, &ops.Fposition, &ops.Fjobinfo,
 			&ops.Facquaintance, &ops.FscheduleTime, &ops.FacquaintanceName,
 			&ops.Frelationship, &ops.FreferralName, &ops.Fstatus,
