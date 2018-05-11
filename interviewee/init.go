@@ -224,6 +224,48 @@ func ReadRejected(c *gin.Context) {
 	c.Writer.Write(b)
 }
 
+func EmailCandidate(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected!")
+	sqlStatement := `SELECT email FROM candidate`
+
+	rows, err := db.Query(sqlStatement)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer rows.Close()
+	// println(rows)
+
+	var response []Candidate
+	for rows.Next() {
+		var ops Candidate
+		if err := rows.Scan(&ops.Femail); err != nil {
+			log.Fatal(err)
+		}
+		response = append(response, ops)
+	}
+
+	b, _ := json.MarshalIndent(response, "", "  ")
+	println(string(b))
+	c.Writer.Write(b)
+}
 func ReadDataOps(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))

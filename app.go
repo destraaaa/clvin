@@ -18,6 +18,7 @@ func main() {
 	r.GET("/nonopsform/view", interviewee.ReadDataNon)
 	r.GET("/rejected/view", interviewee.ReadRejected)
 	r.GET("/opsform/view", interviewee.ReadDataOps)
+	r.GET("/interviewee/email", interviewee.EmailCandidate)
 	r.POST("/nonopsform/filter", chart.Filter)
 	r.GET("/nonopsform/view/total", chart.Candidate)
 	r.GET("/nonopsform/view/schoolpie", chart.SchoolPie)
