@@ -26,7 +26,7 @@ type pieChart struct {
 	Reject     int32  `json:"reject"`
 	Approved   int32  `json:"approved"`
 	OnProgress int32  `json:"onprogress"`
-	Total      int32  `json:"total,omitempty"`
+	Total      int32  `json:"total"`
 	// names
 	// types
 }
