@@ -19,6 +19,11 @@ type filter struct {
 	Daily   string `json:"daily"`
 }
 
+type filterChart struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
 type pieChart struct {
 	Labels     string `json:"labels,omitempty"`
 	Series     int32  `json:"series,omitempty"`
@@ -40,6 +45,7 @@ const (
 )
 
 var Fil filter
+var FilChart filterChart
 
 func Filter(c *gin.Context) {
 	// fmt.Printf([]byte(r.Body))
@@ -56,6 +62,30 @@ func Filter(c *gin.Context) {
 
 	// fmt.Println(fil.Daily, fil.Month, fil.Quarter, fil.Type, fil.Years)
 
+}
+
+func FilterChart(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	err := c.BindJSON(&FilChart)
+	if err != nil {
+		fmt.Println("Error Binding JSON")
+		fmt.Println(err.Error())
+	}
+
+}
+
+func FilteringChart() string {
+	var temp string
+	if FilChart.Type != "all" {
+		temp = " LIMIT " + FilChart.Value
+	} else {
+		temp = ""
+	}
+
+	return temp
 }
 
 //FilteringValidate
@@ -121,13 +151,18 @@ func SchoolPie(c *gin.Context) {
 	// 	fmt.Println("Error Binding JSON")
 	// 	fmt.Println(err.Error())
 	// }
-
-	result := Filtering()
-
 	// schooldb, err := db.Query("SELECT LOWER(school), count(school) FROM candidate WHERE school=school AND EXTRACT(YEAR FROM logtimestamps)= 2018 AND formtype = 'Non Operational Form' AND EXTRACT(QUARTER FROM logtimestamps)= 2 AND EXTRACT(MONTH FROM logtimestamps)= 5 GROUP BY LOWER(school)")
 
-	sqlstatment := "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school)"
-	// fmt.Println(sqlstatment)
+	result := Filtering()
+	limit := FilteringChart()
+	sqlstatment := ""
+
+	if FilChart.Type == "school" {
+		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school)" + limit
+	} else {
+		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school)"
+	}
+
 	schooldb, err := db.Query(sqlstatment)
 	if err != nil {
 		log.Panic(err)
@@ -181,12 +216,12 @@ func JobPie(c *gin.Context) {
 					WHERE
 						jobinfo=jobinfo ` + result + ` GROUP BY jobinfo , countjob`
 
+	println(sqlStatment)
 	dashdb, err := db.Query(sqlStatment)
 	if err != nil {
 		log.Panic(err)
 	}
 	defer dashdb.Close()
-	// println(rows)
 
 	var dataJob []pieChart
 
@@ -226,10 +261,16 @@ func StatPie(c *gin.Context) {
 	result := Filtering()
 
 	sqlStatment := `SELECT concat('(',round((((COUNT(progress))::float/(countProgress)::float)*100::float)::numeric,2)::text,'%) ', 
-					(CASE WHEN progress=1 THEN 'no status'
-						WHEN progress=2 THEN 'reject'
-						WHEN progress=3 THEN 'approved'
-						ELSE 'on progress' END))as percent, COUNT(progress)
+					(CASE WHEN progress=1 THEN 'NO STATUS'
+						WHEN progress=2 THEN 'REJECT'
+						WHEN progress=3 THEN 'APPROVED'
+						WHEN progress=4 THEN 'ON PROGRESS'
+						WHEN progress=5 THEN 'OFFERING - ACCEPTED'
+						WHEN progress=6 THEN 'OFFERING - DECLINED'
+						WHEN progress=7 THEN 'OFFERING - CANCEL'
+						WHEN progress=8 THEN 'HOLD'
+						WHEN progress=9 THEN 'HOLD-REJECT'
+						ELSE 'CLOSED' END))as percent, COUNT(progress)
 					FROM candidate , (SELECT count(*)as countProgress from candidate)as c
 					WHERE progress=progress ` + result + ` GROUP BY progress , countProgress`
 
@@ -279,14 +320,14 @@ func Candidate(c *gin.Context) {
 	result := Filtering()
 	sqlStatment := `SELECT count(*), (SELECT count(*) FROM candidate WHERE progress=2 ` + result + ` ),
 	(SELECT count(*) FROM candidate WHERE progress=3 ` + result + ` ), (SELECT count(*)
-	FROM candidate WHERE progress=4 ` + result + ` ) FROM candidate WHERE progress = progress ` + result
+	FROM candidate WHERE progress=4 ` + result + ` )
+	 FROM candidate WHERE progress = progress ` + result
 
 	dashdb, err := db.Query(sqlStatment)
 	if err != nil {
 		log.Panic(err)
 	}
 	defer dashdb.Close()
-	// println(rows)
 
 	var total []pieChart
 
@@ -336,7 +377,25 @@ func StatBar(c *gin.Context) {
 					from candidate where progress = 3 ` + result +
 		` UNION ALL
 					SELECT  count(progress)
-					from candidate where progress = 4 ` + result
+					from candidate where progress = 4 ` + result +
+		` UNION ALL
+					SELECT  count(progress)
+					from candidate where progress = 5 ` + result +
+		` UNION ALL
+					SELECT  count(progress)
+					from candidate where progress = 6 ` + result +
+		` UNION ALL
+					SELECT  count(progress)
+					from candidate where progress = 7 ` + result +
+		` UNION ALL
+					SELECT  count(progress)
+					from candidate where progress = 8 ` + result +
+		` UNION ALL
+					SELECT  count(progress)
+					from candidate where progress = 9 ` + result +
+		` UNION ALL
+					SELECT  count(progress)
+					from candidate where progress = 10 ` + result
 
 	dashdb, err := db.Query(sqlStatment)
 	if err != nil {
@@ -393,6 +452,18 @@ func CPBar(c *gin.Context) {
 					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=3 ` + result + ` GROUP BY contactpersonid
 					UNION 
 					SELECT contactpersonid, null, null, null, count(contactpersonid)from candidate where progress=4 ` + result + ` GROUP BY contactpersonid
+					UNION 
+					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=5 ` + result + ` GROUP BY contactpersonid
+					UNION 
+					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=6 ` + result + ` GROUP BY contactpersonid
+					UNION 
+					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=7 ` + result + ` GROUP BY contactpersonid
+					UNION 
+					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=8 ` + result + ` GROUP BY contactpersonid
+					UNION 
+					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=8 ` + result + ` GROUP BY contactpersonid
+					UNION 
+					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=10 ` + result + ` GROUP BY contactpersonid
 					) t GROUP BY t.contactpersonid`
 
 	dashdb, err := db.Query(sqlStatment)
@@ -440,10 +511,19 @@ func PositionBar(c *gin.Context) {
 	fmt.Println("Successfully connected!")
 
 	result := Filtering()
+	limit := FilteringChart()
+	sqlStatment := ""
 
-	sqlStatment := `SELECT positionapply, count(positionapply)
+	if FilChart.Type == "position" {
+		sqlStatment = `SELECT positionapply, count(positionapply)
+		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
+		ORDER BY positionapply ASC` + limit
+	} else {
+		sqlStatment = `SELECT positionapply, count(positionapply)
 					FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
 					ORDER BY positionapply ASC`
+	}
+
 	dashdb, err := db.Query(sqlStatment)
 
 	if err != nil {
