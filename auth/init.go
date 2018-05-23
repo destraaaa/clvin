@@ -32,7 +32,9 @@ type User struct {
 	UName       string `json:"name"`
 	UTimestamps string `json:"timestamps"`
 	UEmail      string `json:"email"`
+	UDelete     string `json:"deletes"`
 	UPic        string `json:"pic"`
+	UStatus     bool   `json:"status"`
 }
 
 func ShowValidate(c *gin.Context) {
@@ -104,8 +106,8 @@ func WriteUser(c *gin.Context) {
 	fmt.Println("Successfully connected!")
 
 	sqlStatement := `
-	INSERT INTO users (email, name, pic) VALUES ($1,$2,$3)`
-	_, err = db.Exec(sqlStatement, dataUser.UEmail, dataUser.UName, dataUser.UPic)
+	INSERT INTO users (email, name, pic, status) VALUES ($1,$2,$3, $4)`
+	_, err = db.Exec(sqlStatement, dataUser.UEmail, dataUser.UName, dataUser.UPic, dataUser.UStatus)
 	if err != nil {
 		panic(err)
 	}
@@ -137,8 +139,9 @@ func DeleteUser(c *gin.Context) {
 	}
 	fmt.Println("Successfully connected!")
 
-	sqlStatement := `DELETE FROM users WHERE name=$1 AND email=$2`
-	_, err = db.Exec(sqlStatement, dataUser.UName, dataUser.UEmail)
+	sqlStatement := `UPDATE users SET status = false, deletedBy = $2 WHERE email=$1 ;`
+	fmt.Println(sqlStatement)
+	_, err = db.Exec(sqlStatement, dataUser.UEmail, dataUser.UDelete)
 	if err != nil {
 		panic(err)
 	}
@@ -164,7 +167,7 @@ func ShowUser(c *gin.Context) {
 	}
 	fmt.Println("Successfully connected!")
 
-	userdb, err := db.Query(`SELECT id, name, email, pic, logtimestamps FROM users`)
+	userdb, err := db.Query(`SELECT id, name, email, pic, logtimestamps FROM users WHERE status = true`)
 	if err != nil {
 		log.Panic(err)
 	}

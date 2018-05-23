@@ -25,13 +25,20 @@ type filterChart struct {
 }
 
 type pieChart struct {
-	Labels     string `json:"labels,omitempty"`
-	Series     int32  `json:"series,omitempty"`
-	NoStatus   int32  `json:"nostatus"`
-	Reject     int32  `json:"reject"`
-	Approved   int32  `json:"approved"`
-	OnProgress int32  `json:"onprogress"`
-	Total      int32  `json:"total"`
+	Labels           string `json:"labels,omitempty"`
+	Series           int32  `json:"series,omitempty"`
+	Total            int32  `json:"total"`
+	NoStatus         int32  `json:"nostatus"`
+	Reject           int32  `json:"reject"`
+	Approved         int32  `json:"approved"`
+	OnProgress       int32  `json:"onprogress"`
+	OfferingAccepted int32  `json:"offeringAccepted"`
+	OfferingCancel   int32  `json:"offeringCancel"`
+	OfferingDeclined int32  `json:"offeringDeclined"`
+	Holds            int32  `json:"holds"`
+	HoldsReject      int32  `json:"holdsReject"`
+	Closed           int32  `json:"closed"`
+
 	// names
 	// types
 }
@@ -114,7 +121,7 @@ func Filtering() string {
 		where = append(where, temp)
 	}
 	if Fil.Daily == "day" {
-		temp = "AND EXTRACT(DAY FROM logtimestamps)= EXTRACT(DAY FROM CURRENT_TIMESTAMP)"
+		temp = "AND EXTRACT(DAY FROM logtimestamps)= EXTRACT(DAY FROM CURRENT_TIMESTAMP) AND EXTRACT(MONTH FROM logtimestamps)= EXTRACT(MONTH FROM CURRENT_TIMESTAMP) AND EXTRACT(YEAR FROM logtimestamps)= EXTRACT(YEAR FROM CURRENT_TIMESTAMP)"
 		where = append(where, temp)
 	}
 
@@ -442,30 +449,31 @@ func CPBar(c *gin.Context) {
 
 	result := Filtering()
 
-	sqlStatment := `SELECT t.contactpersonid, COALESCE(sum(t.noStatus),0)as noStatus, COALESCE(sum(t.reject),0)as reject, COALESCE(sum(t.approved),0)as approved, COALESCE(sum(t.onProgress),0)as onProgress
+	sqlStatment := `SELECT t.contactpersonid, COALESCE(sum(t.noStatus),0)as noStatus, COALESCE(sum(t.reject),0)as reject, COALESCE(sum(t.approved),0)as approved, COALESCE(sum(t.onProgress),0)as onProgress, COALESCE(sum(t.OfferingAccepted),0)as OfferingAccepted, COALESCE(sum(t.OfferingDeclined),0)as OfferingDeclined, COALESCE(sum(t.OfferingCancel),0)as OfferingCancel, COALESCE(sum(t.holds),0)as holds, COALESCE(sum(t.holdsReject),0)as holdsReject, COALESCE(sum(t.closed),0)as closed
 					FROM (
-					SELECT contactpersonid, (count(contactpersonid))as noStatus, (null)::bigint as reject, (null)::bigint as approved, (null)::bigint as onProgress
+					SELECT contactpersonid, (count(contactpersonid))as noStatus, (null)::bigint as reject, (null)::bigint as approved, (null)::bigint as onProgress, (null)::bigint as OfferingAccepted, (null)::bigint as OfferingDeclined, (null)::bigint as OfferingCancel, (null)::bigint as holds, (null)::bigint as holdsReject, (null)::bigint as closed
 					from candidate where progress=1 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, count(contactpersonid), null, null from candidate where progress=2 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, count(contactpersonid), null, null, null, null, null, null, null, null from candidate where progress=2 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=3 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, count(contactpersonid), null, null, null, null, null, null, null from candidate where progress=3 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, null, count(contactpersonid)from candidate where progress=4 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, count(contactpersonid), null, null, null, null, null, null from candidate where progress=4 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=5 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, null, count(contactpersonid), null, null, null, null, null from candidate where progress=5 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=6 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, null, null, count(contactpersonid), null, null, null, null from candidate where progress=6 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=7 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, null, null, null, count(contactpersonid), null, null, null from candidate where progress=7 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=8 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, null, null, null, null, count(contactpersonid), null, null from candidate where progress=8 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=8 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, null, null, null, null, null, count(contactpersonid), null from candidate where progress=9 ` + result + ` GROUP BY contactpersonid
 					UNION 
-					SELECT contactpersonid, null, null, count(contactpersonid), null from candidate where progress=10 ` + result + ` GROUP BY contactpersonid
+					SELECT contactpersonid, null, null, null, null, null, null, null, null, null, count(contactpersonid) from candidate where progress=10 ` + result + ` GROUP BY contactpersonid
 					) t GROUP BY t.contactpersonid`
 
+	fmt.Println(sqlStatment)
 	dashdb, err := db.Query(sqlStatment)
 	if err != nil {
 		log.Panic(err)
@@ -478,7 +486,8 @@ func CPBar(c *gin.Context) {
 	for dashdb.Next() {
 		var bar pieChart
 		if err := dashdb.Scan(&bar.Labels, &bar.NoStatus, &bar.Reject, &bar.Approved,
-			&bar.OnProgress); err != nil {
+			&bar.OnProgress, &bar.OfferingAccepted, &bar.OfferingDeclined, &bar.OfferingCancel,
+			&bar.Holds, &bar.HoldsReject, &bar.Closed); err != nil {
 			log.Fatal(err)
 		}
 		Cbar = append(Cbar, bar)
