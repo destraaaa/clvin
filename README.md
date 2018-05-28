@@ -2,7 +2,7 @@ Sample Go app
 
 ## Getting started
 
-1. Clone this repo using `git clone https://github.com/tokopedia/gosample.git <your-project-name>`.
+1. Clone this repo using `git clone https://github.com/destraaaa/clvin.git <your-project-name>`.
 
 2. cd to <your-project-name> and delete the existing git repository by running `rm -rf .git`.
 

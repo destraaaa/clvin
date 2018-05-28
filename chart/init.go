@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/destraaaa/clvin/env"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // _ "github.com/lib/pq"
 )
@@ -42,14 +43,6 @@ type pieChart struct {
 	// names
 	// types
 }
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "newpassword"
-	dbname   = "hris"
-)
 
 var Fil filter
 var FilChart filterChart
@@ -132,13 +125,14 @@ func Filtering() string {
 }
 
 func SchoolPie(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -193,13 +187,14 @@ func SchoolPie(c *gin.Context) {
 }
 
 func JobPie(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -246,13 +241,14 @@ func JobPie(c *gin.Context) {
 }
 
 func StatPie(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -304,13 +300,14 @@ func StatPie(c *gin.Context) {
 }
 
 func Candidate(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -352,13 +349,14 @@ func Candidate(c *gin.Context) {
 }
 
 func StatBar(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -427,13 +425,14 @@ func StatBar(c *gin.Context) {
 }
 
 func CPBar(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -499,13 +498,14 @@ func CPBar(c *gin.Context) {
 }
 
 func PositionBar(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)

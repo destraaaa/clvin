@@ -14,17 +14,9 @@ import (
 	// "golang.org/x/oauth2/google"
 	// newappengine "google.golang.org/appengine"
 	// newurlfetch "google.golang.org/appengine/urlfetch"
-
+	"github.com/destraaaa/clvin/env"
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq" // _ "github.com/lib/pq"
-)
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "newpassword"
-	dbname   = "hris"
+	// _ "github.com/lib/pq"
 )
 
 type User struct {
@@ -38,13 +30,14 @@ type User struct {
 }
 
 func ShowValidate(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -80,6 +73,7 @@ func ShowValidate(c *gin.Context) {
 }
 
 func WriteUser(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -92,7 +86,7 @@ func WriteUser(c *gin.Context) {
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -114,6 +108,7 @@ func WriteUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -126,7 +121,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -148,13 +143,14 @@ func DeleteUser(c *gin.Context) {
 }
 
 func ShowUser(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)

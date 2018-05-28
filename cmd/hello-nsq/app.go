@@ -7,8 +7,7 @@ import (
 
 	"github.com/google/gops/agent"
 
-	"github.com/tokopedia/gosample/nsq"
-	"gopkg.in/tokopedia/logging.v1"
+	"github.com/destraaaa/clvin/nsq"
 )
 
 func init() {
