@@ -7,9 +7,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/destraaaa/clvin/chart"
 	"github.com/gin-gonic/gin"
-	"github.com/gosample/chart"
-	_ "github.com/lib/pq" // _ "github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type Candidate struct {
