@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/destraaaa/clvin/chart"
+	"github.com/destraaaa/clvin/env"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,14 +40,6 @@ type Candidate struct {
 	FupdatedDate      time.Time `json:"updatedDate"`
 }
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "newpassword"
-	dbname   = "hris"
-)
-
 type NullTime struct {
 	Time  time.Time
 	Valid bool
@@ -65,6 +58,8 @@ func (nt NullTime) Value() (driver.Value, error) {
 }
 
 func WriteData(c *gin.Context) {
+	// fmt.Printf([]byte(r.Body))
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -78,7 +73,7 @@ func WriteData(c *gin.Context) {
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -113,13 +108,14 @@ func WriteData(c *gin.Context) {
 
 }
 func ReadDataNon(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -230,13 +226,14 @@ func ReadDataNon(c *gin.Context) {
 }
 
 func ReadRejected(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -331,7 +328,7 @@ func ReadRejected(c *gin.Context) {
 	c.Writer.Write(b)
 }
 func UpdateCandidate(c *gin.Context) {
-
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -345,7 +342,7 @@ func UpdateCandidate(c *gin.Context) {
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -367,13 +364,14 @@ func UpdateCandidate(c *gin.Context) {
 }
 
 func EmailCandidate(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -408,13 +406,14 @@ func EmailCandidate(c *gin.Context) {
 	c.Writer.Write(b)
 }
 func ReadDataOps(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
