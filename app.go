@@ -4,11 +4,10 @@ import (
 
 	// "encoding/json"
 
-	// "github.com/tokopedia/gosample/hello"
+	"github.com/destraaaa/clvin/auth"
+	"github.com/destraaaa/clvin/chart"
+	"github.com/destraaaa/clvin/interviewee"
 	"github.com/gin-gonic/gin"
-	"github.com/gosample/auth"
-	"github.com/gosample/chart"
-	"github.com/gosample/interviewee"
 )
 
 func main() {
