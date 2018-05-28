@@ -39,17 +39,12 @@ type pieChart struct {
 	Holds            int32  `json:"holds"`
 	HoldsReject      int32  `json:"holdsReject"`
 	Closed           int32  `json:"closed"`
-
-	// names
-	// types
 }
 
 var Fil filter
 var FilChart filterChart
 
 func Filter(c *gin.Context) {
-	// fmt.Printf([]byte(r.Body))
-
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -59,9 +54,6 @@ func Filter(c *gin.Context) {
 		fmt.Println("Error Binding JSON")
 		fmt.Println(err.Error())
 	}
-
-	// fmt.Println(fil.Daily, fil.Month, fil.Quarter, fil.Type, fil.Years)
-
 }
 
 func FilterChart(c *gin.Context) {
@@ -145,14 +137,6 @@ func SchoolPie(c *gin.Context) {
 	}
 
 	fmt.Println("Successfully connected!")
-
-	// var fil filter
-	// errs := c.BindJSON(&fil)
-	// if errs != nil {
-	// 	fmt.Println("Error Binding JSON")
-	// 	fmt.Println(err.Error())
-	// }
-	// schooldb, err := db.Query("SELECT LOWER(school), count(school) FROM candidate WHERE school=school AND EXTRACT(YEAR FROM logtimestamps)= 2018 AND formtype = 'Non Operational Form' AND EXTRACT(QUARTER FROM logtimestamps)= 2 AND EXTRACT(MONTH FROM logtimestamps)= 5 GROUP BY LOWER(school)")
 
 	result := Filtering()
 	limit := FilteringChart()
@@ -282,7 +266,6 @@ func StatPie(c *gin.Context) {
 		log.Panic(err)
 	}
 	defer dashdb.Close()
-	// println(rows)
 
 	var dataStat []pieChart
 
@@ -407,8 +390,6 @@ func StatBar(c *gin.Context) {
 		log.Panic(err)
 	}
 	defer dashdb.Close()
-	// println(rows)
-
 	var dataProgress []pieChart
 
 	for dashdb.Next() {
@@ -478,7 +459,6 @@ func CPBar(c *gin.Context) {
 		log.Panic(err)
 	}
 	defer dashdb.Close()
-	// println(rows)
 
 	var Cbar []pieChart
 
@@ -539,7 +519,6 @@ func PositionBar(c *gin.Context) {
 		log.Panic(err)
 	}
 	defer dashdb.Close()
-	// println(rows)
 
 	var dataPos []pieChart
 
