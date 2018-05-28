@@ -36,6 +36,10 @@
 [[constraint]]
   branch = "v1.0"
   name = "gopkg.in/tokopedia/grace.v1"
+  
+[[constraint]]
+  version = "v1.0"
+  name = "gopkg.in/ini.v1"
 
 [[constraint]]
   branch = "v1.1"
