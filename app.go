@@ -4,11 +4,6 @@ import (
 
 	// "encoding/json"
 
-	// "github.com/gin-gonic/gin"
-	// "github.com/gosample/auth"
-	// "github.com/gosample/chart"
-	// "github.com/gosample/interviewee"
-
 	"github.com/destraaaa/clvin/auth"
 	"github.com/destraaaa/clvin/chart"
 	"github.com/destraaaa/clvin/interviewee"
