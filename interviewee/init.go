@@ -2,7 +2,6 @@ package interviewee
 
 import (
 	"database/sql"
-	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +10,7 @@ import (
 	"github.com/destraaaa/clvin/chart"
 	"github.com/destraaaa/clvin/env"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type Candidate struct {
@@ -38,23 +38,6 @@ type Candidate struct {
 	Fprog             string    `json:"statProgress,omitempty"`
 	Ftimestamp        time.Time `json:"timestamp"`
 	FupdatedDate      time.Time `json:"updatedDate"`
-}
-
-type NullTime struct {
-	Time  time.Time
-	Valid bool
-}
-
-func (nt *NullTime) Scan(value interface{}) error {
-	nt.Time, nt.Valid = value.(time.Time)
-	return nil
-}
-
-func (nt NullTime) Value() (driver.Value, error) {
-	if !nt.Valid {
-		return nil, nil
-	}
-	return nt.Time, nil
 }
 
 func WriteData(c *gin.Context) {
@@ -155,7 +138,7 @@ func ReadDataNon(c *gin.Context) {
 
 	var response []Candidate
 	var nickname, phone, school, jobinfo, acquaintanceName, relationship, referralName, major, GPA sql.NullString
-	var updated NullTime
+	var updated pq.NullTime
 	for rows.Next() {
 		var nonops Candidate
 		if err := rows.Scan(&nonops.Fid, &nonops.FfullName, &nickname,
@@ -451,7 +434,7 @@ func ReadDataOps(c *gin.Context) {
 
 	var response []Candidate
 	var nickname, phone, school, jobinfo, acquaintanceName, relationship, referralName sql.NullString
-	var updated NullTime
+	var updated pq.NullTime
 	for rows.Next() {
 		var ops Candidate
 		if err := rows.Scan(&ops.Fid, &ops.FfullName, &nickname,
