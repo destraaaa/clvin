@@ -72,7 +72,7 @@ func FilterChart(c *gin.Context) {
 func FilteringChart() string {
 	var temp string
 	if FilChart.Type != "all" {
-		temp = " LIMIT " + FilChart.Value
+		temp = " OFFSET " + FilChart.Value
 	} else {
 		temp = ""
 	}
@@ -506,11 +506,11 @@ func PositionBar(c *gin.Context) {
 	if FilChart.Type == "position" {
 		sqlStatment = `SELECT positionapply, count(positionapply)
 		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
-		ORDER BY positionapply ASC` + limit
+		ORDER BY positionapply ASC` + limit + `LIMIT 25`
 	} else {
 		sqlStatment = `SELECT positionapply, count(positionapply)
-					FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
-					ORDER BY positionapply ASC`
+		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
+		ORDER BY positionapply ASC LIMIT 25`
 	}
 
 	dashdb, err := db.Query(sqlStatment)
