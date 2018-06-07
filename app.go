@@ -20,6 +20,7 @@ func main() {
 	r.POST("/form/update", interviewee.UpdateCandidate)
 	r.GET("/nonopsform/view/total", chart.Candidate)
 	r.GET("/nonopsform/view/schoolpie", chart.SchoolPie)
+	r.GET("/form/schoolRegist", chart.SchoolRegist)
 	r.GET("/nonopsform/view/jobpie", chart.JobPie)
 	r.GET("/nonopsform/view/statpie", chart.StatPie)
 	r.GET("/nonopsform/view/statbar", chart.StatBar)
