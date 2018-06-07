@@ -27,6 +27,7 @@ type filterChart struct {
 
 type pieChart struct {
 	Labels           string `json:"labels,omitempty"`
+	Major            string `json:"major,omitempty"`
 	Series           int32  `json:"series,omitempty"`
 	Total            int32  `json:"total"`
 	NoStatus         int32  `json:"nostatus"`
@@ -71,8 +72,10 @@ func FilterChart(c *gin.Context) {
 
 func FilteringChart() string {
 	var temp string
-	if FilChart.Type != "all" {
+	if FilChart.Type == "position" {
 		temp = " OFFSET " + FilChart.Value
+	} else if FilChart.Type == "school" {
+		temp = " LIMIT " + FilChart.Value
 	} else {
 		temp = ""
 	}
@@ -116,6 +119,67 @@ func Filtering() string {
 
 }
 
+func SchoolRegist(c *gin.Context) {
+	dbconfig := env.GetConfig().Database
+	c.Writer.Header().Set("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		dbconfig.Host, dbconfig.Port, dbconfig.User, dbconfig.Password, dbconfig.Name)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected!")
+
+	sqlstatment := ""
+
+	sqlstatment = "SELECT LOWER(school) as school, null as major FROM candidate WHERE school!='-' AND school IS NOT NULL GROUP BY LOWER(school) UNION ALL SELECT null, LOWER(major) FROM candidate WHERE major!='-' AND major IS NOT NULL GROUP BY LOWER(major)"
+
+	fmt.Println(sqlstatment)
+
+	schooldb, err := db.Query(sqlstatment)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer schooldb.Close()
+	// println(rows)
+
+	var dataSchool []pieChart
+	var labels, major sql.NullString
+	for schooldb.Next() {
+		var school pieChart
+		if err := schooldb.Scan(&labels, &major); err != nil {
+			log.Fatal(err)
+		}
+
+		if labels.Valid {
+			temp, _ := labels.Value()
+			strTemp, _ := temp.(string)
+			school.Labels = strTemp
+		}
+		if major.Valid {
+			temp, _ := major.Value()
+			strTemp, _ := temp.(string)
+			school.Major = strTemp
+		}
+		dataSchool = append(dataSchool, school)
+	}
+
+	b, _ := json.MarshalIndent(dataSchool, "", "  ")
+	println(string(b))
+	c.Writer.Write(b)
+}
+
 func SchoolPie(c *gin.Context) {
 	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
@@ -143,10 +207,12 @@ func SchoolPie(c *gin.Context) {
 	sqlstatment := ""
 
 	if FilChart.Type == "school" {
-		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school)" + limit
+		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school) ORDER BY count(school) DESC" + limit
 	} else {
-		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school)"
+		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school) ORDER BY count(school) DESC LIMIT 5"
 	}
+
+	fmt.Println(sqlstatment)
 
 	schooldb, err := db.Query(sqlstatment)
 	if err != nil {
