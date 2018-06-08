@@ -139,13 +139,9 @@ func SchoolRegist(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected!")
-
 	sqlstatment := ""
 
 	sqlstatment = "SELECT LOWER(school) as school, null as major FROM candidate WHERE school!='-' AND school IS NOT NULL GROUP BY LOWER(school) UNION ALL SELECT null, LOWER(major) FROM candidate WHERE major!='-' AND major IS NOT NULL GROUP BY LOWER(major)"
-
-	fmt.Println(sqlstatment)
 
 	schooldb, err := db.Query(sqlstatment)
 	if err != nil {
@@ -200,8 +196,6 @@ func SchoolPie(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected!")
-
 	result := Filtering()
 	limit := FilteringChart()
 	sqlstatment := ""
@@ -211,8 +205,6 @@ func SchoolPie(c *gin.Context) {
 	} else {
 		sqlstatment = "SELECT LOWER(school), count(school) FROM candidate WHERE school=school " + result + " GROUP BY LOWER(school) ORDER BY count(school) DESC LIMIT 5"
 	}
-
-	fmt.Println(sqlstatment)
 
 	schooldb, err := db.Query(sqlstatment)
 	if err != nil {
@@ -255,7 +247,6 @@ func JobPie(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Successfully connected!")
 
 	result := Filtering()
 
@@ -268,7 +259,6 @@ func JobPie(c *gin.Context) {
 					WHERE
 						jobinfo=jobinfo ` + result + ` GROUP BY jobinfo , countjob`
 
-	println(sqlStatment)
 	dashdb, err := db.Query(sqlStatment)
 	if err != nil {
 		log.Panic(err)
@@ -309,7 +299,6 @@ func StatPie(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Successfully connected!")
 
 	result := Filtering()
 
@@ -368,8 +357,6 @@ func Candidate(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected!")
-
 	result := Filtering()
 	sqlStatment := `SELECT count(*), (SELECT count(*) FROM candidate WHERE progress=2 ` + result + ` ),
 	(SELECT count(*) FROM candidate WHERE progress=3 ` + result + ` ), (SELECT count(*)
@@ -416,8 +403,6 @@ func StatBar(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("Successfully connected!")
 
 	result := Filtering()
 
@@ -491,8 +476,6 @@ func CPBar(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected!")
-
 	result := Filtering()
 
 	sqlStatment := `SELECT t.contactpersonid, COALESCE(sum(t.noStatus),0)as noStatus, COALESCE(sum(t.reject),0)as reject, COALESCE(sum(t.approved),0)as approved, COALESCE(sum(t.onProgress),0)as onProgress, COALESCE(sum(t.OfferingAccepted),0)as OfferingAccepted, COALESCE(sum(t.OfferingDeclined),0)as OfferingDeclined, COALESCE(sum(t.OfferingCancel),0)as OfferingCancel, COALESCE(sum(t.holds),0)as holds, COALESCE(sum(t.holdsReject),0)as holdsReject, COALESCE(sum(t.closed),0)as closed
@@ -519,7 +502,6 @@ func CPBar(c *gin.Context) {
 					SELECT contactpersonid, null, null, null, null, null, null, null, null, null, count(contactpersonid) from candidate where progress=10 ` + result + ` GROUP BY contactpersonid
 					) t GROUP BY t.contactpersonid`
 
-	fmt.Println(sqlStatment)
 	dashdb, err := db.Query(sqlStatment)
 	if err != nil {
 		log.Panic(err)
@@ -563,16 +545,18 @@ func PositionBar(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected!")
-
 	result := Filtering()
 	limit := FilteringChart()
 	sqlStatment := ""
 
-	if FilChart.Type == "position" {
+	if FilChart.Value == "1" {
+		sqlStatment = `SELECT positionapply, count(positionapply)
+					   FROM candidate WHERE positionapply = positionapply ` + result +
+			` GROUP BY positionapply ORDER BY count(positionapply) DESC LIMIT 25`
+	} else if FilChart.Type == "position" {
 		sqlStatment = `SELECT positionapply, count(positionapply)
 		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
-		ORDER BY positionapply ASC` + limit + `LIMIT 25`
+		ORDER BY positionapply ASC` + limit + ` LIMIT 25`
 	} else {
 		sqlStatment = `SELECT positionapply, count(positionapply)
 		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
