@@ -549,18 +549,20 @@ func PositionBar(c *gin.Context) {
 	limit := FilteringChart()
 	sqlStatment := ""
 
-	if FilChart.Value == "1" {
-		sqlStatment = `SELECT positionapply, count(positionapply)
-					   FROM candidate WHERE positionapply = positionapply ` + result +
-			` GROUP BY positionapply ORDER BY count(positionapply) DESC LIMIT 25`
-	} else if FilChart.Type == "position" {
-		sqlStatment = `SELECT positionapply, count(positionapply)
-		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
-		ORDER BY positionapply ASC` + limit + ` LIMIT 25`
+	if FilChart.Type == "position" {
+		if FilChart.Value == "1" {
+			sqlStatment = `SELECT positionapply, count(positionapply)
+							   FROM candidate WHERE positionapply = positionapply ` + result +
+				` GROUP BY positionapply ORDER BY count(positionapply) DESC LIMIT 25`
+		} else {
+			sqlStatment = `SELECT positionapply, count(positionapply)
+			FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
+			ORDER BY positionapply ASC` + limit + ` LIMIT 25`
+		}
 	} else {
 		sqlStatment = `SELECT positionapply, count(positionapply)
-		FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
-		ORDER BY positionapply ASC LIMIT 25`
+			FROM candidate WHERE positionapply = positionapply ` + result + ` GROUP BY positionapply 
+			ORDER BY positionapply ASC LIMIT 25`
 	}
 
 	dashdb, err := db.Query(sqlStatment)
