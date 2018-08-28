@@ -41,7 +41,7 @@ func ShowValidate(c *gin.Context) {
 	}
 	fmt.Println("Successfully connected!")
 
-	userdb, err := db.Query(`SELECT email, id FROM users`)
+	userdb, err := db.Query(`SELECT email, id, status FROM users`)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -52,7 +52,7 @@ func ShowValidate(c *gin.Context) {
 
 	for userdb.Next() {
 		var user User
-		if err := userdb.Scan(&user.UEmail, &user.UID); err != nil {
+		if err := userdb.Scan(&user.UEmail, &user.UID, &user.UStatus); err != nil {
 			log.Fatal(err)
 		}
 		dataUser = append(dataUser, user)
