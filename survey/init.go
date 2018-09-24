@@ -169,8 +169,6 @@ func ReadAllForm(c *gin.Context) {
 	c.Writer.Write(b)
 }
 
-//a----------------------------------------------------------------------------
-
 func ReadForm(c *gin.Context) {
 	dbconfig := env.GetConfig().Database
 	c.Writer.Header().Set("Content-Type", "application/json")
@@ -202,15 +200,12 @@ func ReadForm(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	// var arrSchema []FormSchema
 	var formSchema FormSchema
 
 	for rows.Next() {
 		if err := rows.Scan(&formSchema.Data, &formSchema.Name); err != nil {
 			log.Fatal(err)
 		}
-
-		// arrSchema = append(arrSchema, formSchema)
 
 	}
 
@@ -288,12 +283,6 @@ func WriteResult(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	// for _, rs := range result {
-	// 	_, err = db.Exec(sqlStatement, rs.SchemaID, rs.Label, rs.Value)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// }
 
 	b, _ := json.MarshalIndent("Successfully add Result ", "", "  ")
 	fmt.Println(string(b))
@@ -323,14 +312,6 @@ func ReadResult(c *gin.Context) {
 	result := c.Param("id")
 
 	fmt.Println("Successfully connected!")
-
-	// sqlStatement := `SELECT form_result.schema_id, questions
-	// FROM form_result JOIN form_schema ON form_schema.schema_id = form_result.schema_id
-	// WHERE form_result.schema_id =$1`
-
-	// sqlAnswer := `SELECT form_result.schema_id,answer, questions
-	// FROM form_result JOIN form_schema ON form_schema.schema_id = form_result.schema_id
-	// WHERE form_result.schema_id =$1`
 
 	sqlStatement := `SELECT form_result.schema_id, questions
 	FROM form_result JOIN form_schema ON form_schema.schema_id = form_result.schema_id
@@ -371,16 +352,6 @@ func ReadResult(c *gin.Context) {
 	joinAnswer.SchemaID = formResult.SchemaID
 	joinAnswer.AnswerResult = resultAnswer
 	joinAnswer.Questions = formResult.Questions
-
-	// var resultAnswer []ResultForm
-	// for rowsAnswer.Next() {
-	// 	var answer ResultForm
-	// 	if err := rowsAnswer.Scan(&answer.SchemaID, &answer.Answer.RawMessage, pq.Array(&answer.Questions)); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-
-	// 	resultAnswer = append(resultAnswer, answer)
-	// }
 
 	fmt.Println("resultAnswer", resultAnswer)
 	fmt.Println("formResult", formResult)
